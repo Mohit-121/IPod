@@ -173,8 +173,8 @@ class App extends React.Component{
               <div style={{display:'flex',flexDirection:'column-reverse',alignItems:'center',height:'250px',justifyContent:'space-between'}}>
                <h1 style={{margin:'20px',color:'#ffffff'}}><FontAwesomeIcon icon={faFingerprint} /></h1>
                <h3 style={{color:'#ffffff'}}>_&ensp;_&ensp;_&ensp;_</h3>
-               <h3 style={{color:'#ffffff'}}>Enter your password</h3>
-               <h2 style={{margin:'20px',color:'#ffffff'}}>
+               <h3 style={{color:'#ffffff',fontFamily:'cursive'}}>Enter your password</h3>
+               <h2 style={{margin:'20px',color:'#ffffff',fontFamily:'monospace',fontSize:'30px'}}>
                  {date.toLocaleTimeString('en-US', {hour: '2-digit',hour12: 'true',minute:'2-digit'})}
                </h2>
               </div>}
