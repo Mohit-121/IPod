@@ -132,6 +132,7 @@
   top:35%;
   left:80%;
   color: red;
+  filter:drop-shadow(0 0 0.5rem crimson)
 }
 
 .item3{
@@ -139,12 +140,18 @@
   top:35%;
   left:7%;
   color: red;
+  filter:drop-shadow(0 0 0.5rem crimson)
 }
 
 .item4{
   position: absolute;
   bottom:5px;
   text-shadow: 1px 1px 2px black,  0 0 5px darkblue;
+}
+
+.item1:active,.item2:active,.item3:active,.item4:active{
+  text-shadow: none;
+  filter:none;
 }
 
 .games,.settings{
