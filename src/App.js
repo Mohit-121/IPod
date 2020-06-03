@@ -217,7 +217,7 @@ class App extends React.Component{
               <h3 className="item2" onClick={() =>this.nextItem()}><FontAwesomeIcon icon={faFastForward} /></h3>
               <h3 className="item3" onClick={() => this.prevItem()}><FontAwesomeIcon icon={faFastBackward} /></h3>
               <h3 className="item4" onClick={() => this.backClick()}><FontAwesomeIcon icon={faChevronLeft} /> Back</h3>
-              <button className="okbutton" onClick={()=>{this.okClick()}}>OK</button>
+              <button className="okbutton" onClick={()=>{this.okClick()}}><b>OK</b></button>
             </div>
           </div>
         </div>
