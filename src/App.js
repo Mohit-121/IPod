@@ -74,6 +74,28 @@ class App extends React.Component{
     });
   }
 
+  // Go to the next item using click
+  nextItem = () => {
+    this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
+    let actElt=$('.active');
+    let nextElt=$('.active').next();
+    if(nextElt.length!==0){
+      actElt.removeClass('active');
+      nextElt.addClass('active');
+    }
+  }
+
+  // Go to the prev item using click
+  prevItem = () => {
+    this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
+    let actElt=$('.active');
+    let prevElt=$('.active').prev();
+    if(prevElt.length!==0){
+      actElt.removeClass('active');
+      prevElt.addClass('active');
+    }
+  }
+
   // goes back one page in the application
   backClick = () => {
     this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
@@ -192,8 +214,8 @@ class App extends React.Component{
           <div className="box">
             <div className="menu-region" draggable="false" onClick={()=>{this.rotateEvent()}}>
               <h3 className="item1" onClick={() => this.menuDisplay()}>Menu</h3>
-              <h3 className="item2"><FontAwesomeIcon icon={faFastForward} /></h3>
-              <h3 className="item3"><FontAwesomeIcon icon={faFastBackward} /></h3>
+              <h3 className="item2" onClick={() =>this.nextItem()}><FontAwesomeIcon icon={faFastForward} /></h3>
+              <h3 className="item3" onClick={() => this.prevItem()}><FontAwesomeIcon icon={faFastBackward} /></h3>
               <h3 className="item4" onClick={() => this.backClick()}><FontAwesomeIcon icon={faChevronLeft} /> Back</h3>
               <button className="okbutton" onClick={()=>{this.okClick()}}>OK</button>
             </div>
