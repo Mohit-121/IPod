@@ -1,3 +1,41 @@
+.App {
+  display:flex;
+  flex-direction: column;
+  height: 800px;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover{
+  padding: 0 2px 20px 2px;
+  border-radius: 10%;
+  background-color: #cac8c8;
+  box-shadow: inset 0 0 10px #000000,0 0 5px #000000;
+}
+
+.header{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height:50px;
+}
+
+.notification-bar{
+  width:80px;
+  border:3px solid #3c3c3c;
+  border-radius: 5px;
+  box-shadow: inset 0 0 10px #000000,0 0 5px #000000;
+  margin-bottom:10px;
+}
+
+.camera{
+  width: 20px;
+  border-radius: 50%;
+  border:7px solid black;
+  box-shadow: inset 0 0 10px #000000,0 0 8px #000000;
+}
+
 .list{
   width: 280px;
   height: 250px;
@@ -17,16 +55,11 @@
   margin-top:-1px;
 }
 
-.logo{
-  color:white;
-}
-
 .list-group{
   border-radius:5px;
   box-shadow: inset 0 0 10px #000000;
   border-bottom:1px solid black;
 }
-
 
 .list-group-item{
   border:none;
@@ -38,6 +71,7 @@
 .active{
   color:orangered !important;
   font-weight: bold !important;
+  font-size: 16px;
 }
 
 .box {
@@ -49,15 +83,7 @@
   margin-top:10px;
 }
 
-.center {
-  display:flex;
-  flex-direction: column;
-  height: 800px;
-  align-items: center;
-  justify-content: center;
-}
-
-.circle{
+.menu-region{
   width:70%;
   height:90%;
   border-radius: 50%;
@@ -70,7 +96,7 @@
   box-shadow: inset 0 0 5px #000000;
 }
 
-.innercircle{
+.okbutton{
   display: flex;
   justify-content: center;
   align-items: center;
@@ -83,12 +109,12 @@
   box-shadow: 0px 0px 6px 4px lightslategray;
 }
 
-.innercircle:active,.innercircle:focus{
+.okbutton:active,.okbutton:focus{
   outline:none;
   border:none;
 }
 
-.innercircle:active{
+.okbutton:active{
   box-shadow: none;
 }
 
@@ -114,7 +140,7 @@
   bottom:5px;
 }
 
-.games,.music,.settings{
+.games,.settings{
   display:flex;
   flex-direction: column;
   align-items: center;
@@ -126,31 +152,8 @@
   border-radius: 4px;
 }
 
-.games img,.music img,.settings img{
+.games img,.settings img{
   height: 50%;
   width: 50%;
   border-radius: 5px;
-}
-
-.cover{
-  /* padding-top:50px; */
-  padding-bottom:20px;
-  /* border:2px solid red; */
-  border-radius: 10%;
-  background-color: #cac8c8;
-  box-shadow: inset 0 0 10px #000000,0 0 5px #000000;
-}
-
-.header{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height:50px;
-  width:inherit;
-}
-
-.camera{
-  width:80px;
-  border:3px solid black;
-  box-shadow: inset 0 0 10px #000000,0 0 5px #000000;
 }
