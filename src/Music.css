@@ -34,6 +34,7 @@
 }
 
 .image-details .details{
+  width: 60%;
   margin-top:30px;
   margin-left:-10px;
 }
@@ -41,11 +42,12 @@
 .image-details .details h4{
   font-weight: bold;
   font-size: 22px;
-  font-family: monospace;
+  /* font-family: monospace; */
 }
 
 .image-details .details h5{
-  margin-left: 15px;
+  margin-left: 5px;
+  margin-top:15px;
 }
 
 .player{
@@ -73,4 +75,35 @@
   background-color: green;
   height:6px;
   margin-right:5px;
+}
+
+.songs-list{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  background-color: white;
+  width: 274px;
+  height: 246px;
+  margin-top:-1px;
+  border-radius: 4px;
+}
+
+.songs-list .list-group{
+  display:flex;
+  flex-direction: column;
+  width: 274px;
+  height: 90%;
+  overflow-y:scroll;
+  padding: -50px;
+}
+
+.songs-list .list-group .list-group-item{
+  min-height: 28%;
+  display:flex;
+  justify-content: space-between;
+}
+
+.songs-list .list-group .list-group-item button{
+  float:right;
 }

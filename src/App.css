@@ -132,7 +132,7 @@
   top:35%;
   left:80%;
   color: red;
-  filter:drop-shadow(0 0 0.5rem crimson)
+  filter:drop-shadow(0 0 0.2rem crimson)
 }
 
 .item3{
@@ -140,7 +140,7 @@
   top:35%;
   left:7%;
   color: red;
-  filter:drop-shadow(0 0 0.5rem crimson)
+  filter:drop-shadow(0 0 0.2rem crimson)
 }
 
 .item4{

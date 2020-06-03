@@ -4,11 +4,13 @@ import { faChevronLeft,faAppleAlt,faBackward,faPause,faForward } from "@fortawes
 import './Music.css';
 
 class Music extends React.Component{
+           
     render() {
-        const {songDisplay}=this.props;
+        const {songDisplay,songs,isPlayed,index,playClick}=this.props;
+        const curSong=songs[index-1]
         return (
             <div className="Music">
-                {!songDisplay &&
+                {!songDisplay && !isPlayed &&
                 <div className="row">
                     <div className="col-7">
                         <div className="list-group" id="list-tab" role="tablist">
@@ -22,16 +24,16 @@ class Music extends React.Component{
                     </div>
                 </div>}
 
-                {songDisplay &&
+                {isPlayed &&
                 <div className="music-player">
                     <h3><FontAwesomeIcon icon={faAppleAlt} /> IPod Player</h3>
                     <div className="image-details">
                         <div className="image-container">
-                            <img src="https://a10.gaanacdn.com/images/albums/4/2098804/crop_175x175_2098804.jpg" alt="hurtyou"></img>
+                            <img src={curSong.image_url} alt={curSong.song_name}></img>
                         </div>
                         <div className="details">
-                            <h4>01. Hurt you</h4>
-                            <h5>-By Weekend</h5>
+                            <h4>{(index<10?"0"+index:index)+". "+(curSong.song_name.length>18?curSong.song_name.substring(0,18)+"...":curSong.song_name)}</h4>
+                            <h5>-By {curSong.artist.length>10?curSong.artist.substring(0,10)+"...":curSong.artist}</h5>
                         </div>
                     </div>
                     <div className="player">
@@ -42,6 +44,21 @@ class Music extends React.Component{
                         <div className="player-div">
                             <div className="finished"></div>
                         </div>
+                    </div>
+                </div>}
+
+                {songDisplay &&
+                <div className="songs-list">
+                    <h3 style={{textAlign:'center'}}>All Songs</h3>
+                    <div className="list-group" id="list-tab" role="tablist">
+                        {
+                            songs.map((song,index) =>(
+                                <a className={"list-group-item list-group-item-action "+(index===0?"active":"")} id={song.id} data-toggle="list" href={"#"+song.id} 
+                                    role="tab" aria-controls={song.id} key={index}>
+                                    {(index+1)+" "+song.song_name} <button type="button" onClick={() =>{playClick(index+1)}} className="btn btn-success">Play</button>
+                                </a>
+                            ))
+                        }
                     </div>
                 </div>}
             </div>
