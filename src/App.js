@@ -1,12 +1,12 @@
 import React from 'react';
-import { faFastBackward, faFastForward, faStepForward, faCaretRight, faAppleAlt,faFingerprint } from "@fortawesome/free-solid-svg-icons";
+import { faFastBackward, faFastForward, faCaretRight, faAppleAlt,faFingerprint, faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ZingTouch from 'zingtouch';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import './App.css';
 import $ from 'jquery';
-import Music from './Music'
+import Music from './Music';
 
 class App extends React.Component{
   constructor () {
@@ -16,6 +16,7 @@ class App extends React.Component{
       isGameClicked: false,
       isMusicClicked: false,
       isSettingsClicked: false,
+      songDisplay: false,
       zt:new ZingTouch.Region(document.body),
       date: new Date()
     }
@@ -68,23 +69,26 @@ class App extends React.Component{
       isMenuClicked: !this.state.isMenuClicked,
       isGameClicked: false,
       isMusicClicked: false,
-      isSettingsClicked: false
+      isSettingsClicked: false,
+      songDisplay: false
     });
   }
 
-  // Ok button to select the currently active item
-  okClick = () => {
-    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked}=this.state;
+  // goes back one page in the application
+  backClick = () => {
     this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
+    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked,songDisplay}=this.state;
 
-    // Find the active selection and accordingly set state
-    let selection=$('.active').prop('id');
-    console.log(selection);
-    isMenuClicked=false;
-    if(selection==='list-games-list') isGameClicked=true;
-    if(selection==='list-music-list') isMusicClicked=true;
-    if(selection==='list-settings-list') isSettingsClicked=true;
-    if(selection==='back'){
+    // Find the point right now the ipod is at and navigate forward or back likewise
+    if(!isGameClicked && !isMenuClicked && !isSettingsClicked && !isMusicClicked) return;
+    if(isMenuClicked) isMenuClicked=false;
+    else if(isGameClicked || isSettingsClicked){
+      isGameClicked=false;
+      isSettingsClicked=false;
+      isMenuClicked=true;
+    }
+    else if(isMusicClicked && songDisplay) songDisplay=false;
+    else if(isMusicClicked){
       isMusicClicked=false;
       isMenuClicked=true;
     }
@@ -93,7 +97,36 @@ class App extends React.Component{
       isMenuClicked: isMenuClicked,
       isGameClicked: isGameClicked,
       isMusicClicked: isMusicClicked,
-      isSettingsClicked: isSettingsClicked
+      isSettingsClicked: isSettingsClicked,
+      songDisplay: songDisplay
+    });
+  }
+
+  // Ok button to select the currently active item
+  okClick = () => {
+    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked,songDisplay}=this.state;
+    this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
+
+    // Find the active selection and accordingly set state
+    let selection=$('.active').prop('id');
+    isMenuClicked=false;
+    if(selection==='list-games-list') isGameClicked=true;
+    if(selection==='list-music-list') isMusicClicked=true;
+    if(selection==='list-settings-list') isSettingsClicked=true;
+    if(selection==='back'){
+      isMusicClicked=false;
+      isMenuClicked=true;
+    }
+    if(selection==='all-songs-list' || selection==='favourite-list' || selection==='playlist'){
+      songDisplay=true;
+    }
+
+    this.setState({
+      isMenuClicked: isMenuClicked,
+      isGameClicked: isGameClicked,
+      isMusicClicked: isMusicClicked,
+      isSettingsClicked: isSettingsClicked,
+      songDisplay: songDisplay
     },()=>{
       if(selection==='back'){
         $('#list-home-list').removeClass('active');
@@ -103,10 +136,10 @@ class App extends React.Component{
   }
 
   render() {
-    const {isMenuClicked,isGameClicked,isMusicClicked,isSettingsClicked,date}=this.state;
+    const {isMenuClicked,isGameClicked,isMusicClicked,isSettingsClicked,songDisplay,date}=this.state;
     return (
       <div className="App">
-        <h1 style={{marginBottom:'20px'}}><FontAwesomeIcon icon={faAppleAlt} /> My Ipod</h1>
+        <h1 style={{marginBottom:'20px'}}><FontAwesomeIcon icon={faAppleAlt} /> My IPod</h1>
         <div className="cover">
           <div className="header">
             <div className="notification-bar"></div>
@@ -140,18 +173,18 @@ class App extends React.Component{
 
             {isGameClicked && 
             <div className="games">
-              <img src="https://lh3.googleusercontent.com/proxy/CCCcHeblZU9W1ivdoVgCwOe_YrQ-YkjmhNLfCdV_OKkq9lCbkfjCMMHsyf_bZR8mYyvuyXjKnV9s2O31BD0xGji_nN-foCEqsVs44VvR1aR8K-duwEAFH0xHwWRIh0G5nFUNJ3Y0AlLDxCoKoVhnsjvykJ4" alt="games"></img>
+              <img src="https://www.collinsdictionary.com/images/full/dice_393025615_1000.jpg" alt="games"></img>
               <h3>Games</h3>
             </div>}
 
             {isMusicClicked && 
             <div className="music">
-              <Music isMenuClicked={isMenuClicked} isGameClicked={isGameClicked} isMusicClicked={isMusicClicked}/>
+              <Music songDisplay={songDisplay}/>
             </div>}
 
             {isSettingsClicked && 
             <div className="settings">
-              <img src="https://icons.iconarchive.com/icons/icons8/ios7/512/Very-Basic-Settings-icon.png" alt="games"></img>
+              <img src="https://icons.iconarchive.com/icons/icons8/ios7/512/Very-Basic-Settings-icon.png" alt="settings"></img>
               <h3>Settings</h3>
             </div>}
           </div>
@@ -161,7 +194,7 @@ class App extends React.Component{
               <h3 className="item1" onClick={() => this.menuDisplay()}>Menu</h3>
               <h3 className="item2"><FontAwesomeIcon icon={faFastForward} /></h3>
               <h3 className="item3"><FontAwesomeIcon icon={faFastBackward} /></h3>
-              <h3 className="item4"><FontAwesomeIcon icon={faStepForward} /></h3>
+              <h3 className="item4" onClick={() => this.backClick()}><FontAwesomeIcon icon={faChevronLeft} /> Back</h3>
               <button className="okbutton" onClick={()=>{this.okClick()}}>OK</button>
             </div>
           </div>
