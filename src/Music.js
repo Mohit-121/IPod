@@ -1,12 +1,12 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft,faAppleAlt,faBackward,faPause,faForward } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft,faAppleAlt,faBackward,faPause,faForward, faPlay } from "@fortawesome/free-solid-svg-icons";
 import './Music.css';
 
 class Music extends React.Component{
            
     render() {
-        const {songDisplay,songs,isPlayed,index,playClick}=this.props;
+        const {songDisplay,songs,isPlayed,index,playClick,pauseButtonHandler,isPaused,prevHandler,nextHandler}=this.props;
         const curSong=songs[index-1]
         return (
             <div className="Music">
@@ -37,12 +37,18 @@ class Music extends React.Component{
                         </div>
                     </div>
                     <div className="player">
-                        <h3><FontAwesomeIcon icon={faBackward} /></h3>
-                        &ensp;&ensp;<h3><FontAwesomeIcon icon={faPause} /></h3>
-                        &ensp;&ensp;<h3><FontAwesomeIcon icon={faForward} /></h3>
+                        <h3 onClick={()=>prevHandler()}><FontAwesomeIcon icon={faBackward} /></h3>
+                        &ensp;&ensp;<h3 onClick={()=>pauseButtonHandler()}><FontAwesomeIcon icon={isPaused?faPlay:faPause} /></h3>
+                        &ensp;&ensp;<h3 onClick={()=>nextHandler()}><FontAwesomeIcon icon={faForward} /></h3>
                         &ensp;&ensp;
-                        <div className="player-div">
-                            <div className="finished"></div>
+                        <div className="player-details">
+                            <div className="player-div" id="scrolling-div">
+                                <div className="finished"></div>
+                            </div>
+                            <div>
+                                <span className='start-time'>0:00</span>
+                                <span className='end-time' style={{float:'right'}}>0:00</span>
+                            </div>
                         </div>
                     </div>
                 </div>}

@@ -19,8 +19,10 @@ class App extends React.Component{
       songDisplay: false,
       zt:new ZingTouch.Region(document.body),
       date: new Date(),
+      audioElement: null,
       isPlayed: false,
       songId: 0,
+      isPaused: false,
       songs: [
         {
             id: 1,
@@ -136,6 +138,7 @@ class App extends React.Component{
           if(nextElt.length!==0){
             actElt.removeClass('active');
             nextElt.addClass('active');
+            $(nextElt)[0].scrollIntoView();
           }
           prevDist=e.detail.distanceFromOrigin;
       }else if(prevDist-e.detail.distanceFromOrigin>50){
@@ -144,6 +147,7 @@ class App extends React.Component{
         if(prevElt.length!==0){
           actElt.removeClass('active');
           prevElt.addClass('active');
+          $(prevElt)[0].scrollIntoView();
         }
         prevDist=e.detail.distanceFromOrigin;
       }
@@ -165,32 +169,50 @@ class App extends React.Component{
 
   // Go to the next item using click
   nextItem = () => {
+    const {isPlayed,songId,songs,audioElement}=this.state;
     this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
-    let actElt=$('.active');
-    let nextElt=$('.active').next();
-    if(nextElt.length!==0){
-      $(nextElt)[0].scrollIntoView();
-      actElt.removeClass('active');
-      nextElt.addClass('active');
+    if(!isPlayed){
+      let actElt=$('.active');
+      let nextElt=$('.active').next();
+      if(nextElt.length!==0){
+        $(nextElt)[0].scrollIntoView();
+        actElt.removeClass('active');
+        nextElt.addClass('active');
+      }
+    }else{
+      if(typeof(audioElement)==='object'){
+        audioElement.pause();
+      }
+      if(songId+1<=songs.length) this.playClick(songId+1);
+      else this.playClick(songId);
     }
   }
 
   // Go to the prev item using click
   prevItem = () => {
+    const {isPlayed,songId,audioElement}=this.state;
     this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
-    let actElt=$('.active');
-    let prevElt=$('.active').prev();
-    if(prevElt.length!==0){
-      $(prevElt)[0].scrollIntoView();
-      actElt.removeClass('active');
-      prevElt.addClass('active');
+    if(!isPlayed){
+      let actElt=$('.active');
+      let prevElt=$('.active').prev();
+      if(prevElt.length!==0){
+        $(prevElt)[0].scrollIntoView();
+        actElt.removeClass('active');
+        prevElt.addClass('active');
+      }
+    }else{
+        if(typeof(audioElement)==='object'){
+          audioElement.pause();
+        }
+        if(songId-1>=1) this.playClick(songId-1);
+        else this.playClick(songId);
+      }
     }
-  }
 
   // goes back one page in the application
   backClick = () => {
     this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
-    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked,songDisplay,isPlayed}=this.state;
+    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked,songDisplay,isPlayed,audioElement}=this.state;
 
     // Find the point right now the ipod is at and navigate forward or back likewise
     if(!isGameClicked && !isMenuClicked && !isSettingsClicked && !isMusicClicked) return;
@@ -210,19 +232,25 @@ class App extends React.Component{
       isMenuClicked=true;
     }
 
+    // When clicked on back pause the audio Element
+    if(typeof(audioElement)==='object'){
+      audioElement.pause();
+    }
+
     this.setState({
       isMenuClicked: isMenuClicked,
       isGameClicked: isGameClicked,
       isMusicClicked: isMusicClicked,
       isSettingsClicked: isSettingsClicked,
       songDisplay: songDisplay,
-      isPlayed: isPlayed
+      isPlayed: isPlayed,
+      audioElement: audioElement
     });
   }
 
   // Ok button to select the currently active item
   okClick = () => {
-    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked,songDisplay,songs,isPlayed,songId}=this.state;
+    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked,songDisplay,songs,isPlayed,songId,audioElement,isPaused}=this.state;
     this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
 
     // Find the active selection and accordingly set state
@@ -239,11 +267,13 @@ class App extends React.Component{
       songDisplay=true;
     }
 
-    songs.map(song =>{
+    songs.map((song,index) =>{
       if(song.id===parseInt(selection)){
         songDisplay=false;
         isPlayed=true;
         songId=song.id;
+        isPaused=false;
+        audioElement=this.createAudioElement(index);
       }
       return 0;
     });
@@ -255,7 +285,9 @@ class App extends React.Component{
       isSettingsClicked: isSettingsClicked,
       songDisplay: songDisplay,
       isPlayed: isPlayed,
-      songId: songId
+      songId: songId,
+      audioElement: audioElement,
+      isPaused: isPaused
     },()=>{
       if(selection==='back'){
         $('#list-home-list').removeClass('active');
@@ -264,16 +296,76 @@ class App extends React.Component{
     });
   }
 
+  // creates and audio Element and updates time
+  createAudioElement = (index) => {
+    let {audioElement,songs}=this.state;
+    let self=this;
+
+    audioElement = document.createElement('audio');
+    audioElement.setAttribute('src', songs[index].src);
+    audioElement.addEventListener("canplay",function(){
+      let duration=audioElement.duration;
+      let minutes=parseInt(duration/60);
+      let seconds=parseInt(duration%60);
+      let time=(minutes<10?"0"+minutes:minutes)+":"+(seconds<10?"0"+seconds:seconds)
+      $('.end-time').text(time);
+      audioElement.play();
+    });
+
+    audioElement.addEventListener("timeupdate",function(){
+      let {isPaused,audioElement}=self.state;
+      let currentTime=audioElement.currentTime;
+      let duration=audioElement.duration;
+      let minutes=parseInt(currentTime/60);
+      let seconds=parseInt(currentTime%60);
+
+      $('#scrolling-div').mousedown(function(e){
+        isPaused=self.state.isPaused;
+        audioElement=self.state.audioElement;
+        let rect = e.target.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let song_length=this.getBoundingClientRect().right-this.getBoundingClientRect().left;
+        let percentage=(x/song_length)*100;
+        let new_current_time=(audioElement.duration/100)*percentage;
+        audioElement.currentTime=new_current_time;
+        if(new_current_time!==audioElement.duration && isPaused) self.pauseButtonHandler();
+      });
+
+      let time=(minutes<10?"0"+minutes:minutes)+":"+(seconds<10?"0"+seconds:seconds)
+      let percentage=(currentTime*100/duration)+"%";
+      $('.finished').css('width',percentage);
+      $('.start-time').text(time);
+
+
+      if(currentTime===duration) self.pauseButtonHandler();
+      });
+
+    return audioElement;
+  }
+
+  // Play songs on clicking of play button
   playClick = (index) =>{
+    let audioElement=this.createAudioElement(index-1);
     this.setState({
       songDisplay: false,
       isPlayed: true,
-      songId: index
+      songId: index,
+      audioElement: audioElement
+    });
+  }
+
+  // pauseButton event handler
+  pauseButtonHandler = () =>{
+    const {audioElement,isPaused}=this.state;
+    if(!isPaused) audioElement.pause();
+    else audioElement.play();
+    this.setState({
+      isPaused: !isPaused
     });
   }
 
   render() {
-    const {isMenuClicked,isGameClicked,isMusicClicked,isSettingsClicked,songDisplay,isPlayed,songId,date}=this.state;
+    const {isMenuClicked,isGameClicked,isMusicClicked,isSettingsClicked,songDisplay,isPlayed,songId,isPaused,date}=this.state;
     return (
       <div className="App">
         <h1 style={{marginBottom:'20px'}}><FontAwesomeIcon icon={faAppleAlt} /> My IPod</h1>
@@ -316,7 +408,8 @@ class App extends React.Component{
 
             {isMusicClicked && 
             <div className="music">
-              <Music songDisplay={songDisplay} songs={this.state.songs} isPlayed={isPlayed} index={songId} playClick={this.playClick}/>
+              <Music songDisplay={songDisplay} songs={this.state.songs} isPlayed={isPlayed} index={songId} playClick={this.playClick}
+                      pauseButtonHandler={this.pauseButtonHandler} isPaused={isPaused} prevHandler={this.prevItem} nextHandler={this.nextItem}/>
             </div>}
 
             {isSettingsClicked && 

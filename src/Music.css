@@ -2,7 +2,7 @@
     display:flex;
     flex-direction: column;
     background-color: midnightblue;
-    width: 274px;
+    width: 276px;
     height: 246px;
     margin-top:-1px;
     border-radius: 4px;
@@ -29,8 +29,8 @@
 .image-container img{
   margin-left:-20px;
   margin-top:10px;
-  height: 80%;
-  width: 80%;
+  height: 100px;
+  width: 100px;
 }
 
 .image-details .details{
@@ -62,19 +62,26 @@
   cursor: pointer;
 }
 
+.player-details{
+  margin-top:20px;
+  width:60%;
+}
+
 .player-div{
-  width: 60%;
+  width: 98%;
   border: 2px solid black;
   box-shadow: inset 0 0 5px #000000;
   margin-right:5px;
-  border-radius:5px;
+  border-radius:8px;
+  cursor: pointer;
 }
 
 .finished {
-  width:30%;
+  width:0%;
   background-color: green;
   height:6px;
   margin-right:5px;
+  border-radius:8px;
 }
 
 .songs-list{
