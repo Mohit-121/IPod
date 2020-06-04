@@ -1,5 +1,5 @@
 import React from 'react';
-import { faFastBackward, faFastForward, faCaretRight, faAppleAlt,faFingerprint, faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import { faFastBackward, faFastForward, faCaretRight, faAppleAlt, faChevronLeft, faLock, faLockOpen } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ZingTouch from 'zingtouch';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -23,6 +23,7 @@ class App extends React.Component{
       isPlayed: false,
       songId: 0,
       isPaused: false,
+      isUnlocked: false,
       songs: [
         {
             id: 1,
@@ -61,14 +62,14 @@ class App extends React.Component{
       },
       {
         id: 6,
-        src:"../Assets/Songs/Avicii ft. Rita Ora - Lonely Together (Alan Walker Remix)(MyMp3Maza.in).mp3",
+        src:"/Assets/Songs/Avicii ft. Rita Ora - Lonely Together (Alan Walker Remix)(MyMp3Maza.in).mp3",
         image_url:"/Assets/Images/Lonely_together.jpg",
         song_name:"Lonely Together",
         artist:"Avicii ft.Rita Ora"
     },
     {
         id: 7,
-        src:"../Assets/Songs/Rita_Ora_Anywhere.mp3",
+        src:"/Assets/Songs/Rita_Ora_Anywhere.mp3",
         image_url:"/Assets/Images/Rita_Ora_-_Anywhere.jpg",
         song_name:"Anywhere",
         artist:"Rita Ora"
@@ -181,16 +182,18 @@ class App extends React.Component{
       }
     }else{
       if(typeof(audioElement)==='object'){
-        audioElement.pause();
+        if(songId+1<=songs.length) this.pauseButtonHandler();
       }
-      if(songId+1<=songs.length) this.playClick(songId+1);
-      else this.playClick(songId);
+      if(songId+1<=songs.length){
+        audioElement.pause();
+        this.playClick(songId+1);
+      }
     }
   }
 
   // Go to the prev item using click
   prevItem = () => {
-    const {isPlayed,songId,audioElement}=this.state;
+    const {isPlayed,songId,audioElement,songs}=this.state;
     this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
     if(!isPlayed){
       let actElt=$('.active');
@@ -202,19 +205,34 @@ class App extends React.Component{
       }
     }else{
         if(typeof(audioElement)==='object'){
-          audioElement.pause();
+          if(songId===songs.length){
+            this.setState({
+              audioElement: null,
+              isPaused: true
+            });
+          }
+          else if(songId-1>=1){
+            this.pauseButtonHandler();
+          }
         }
-        if(songId-1>=1) this.playClick(songId-1);
-        else this.playClick(songId);
+        if(songId-1>=1){
+          audioElement.pause();
+          this.setState({audioElement:null});
+          this.playClick(songId-1);
+        }
       }
     }
 
   // goes back one page in the application
   backClick = () => {
     this.state.zt.unbind(document.getElementsByClassName('menu-region')[0]);
-    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked,songDisplay,isPlayed,audioElement}=this.state;
+    let {isGameClicked,isMusicClicked,isSettingsClicked,isMenuClicked,songDisplay,isPlayed,audioElement,songId,isUnlocked}=this.state;
 
     // Find the point right now the ipod is at and navigate forward or back likewise
+    if(isUnlocked && !isMenuClicked && !isGameClicked && !isMusicClicked){
+      this.setState({isUnlocked:false});
+      return;
+    }
     if(!isGameClicked && !isMenuClicked && !isSettingsClicked && !isMusicClicked) return;
     if(isMenuClicked) isMenuClicked=false;
     else if(isGameClicked || isSettingsClicked){
@@ -225,6 +243,13 @@ class App extends React.Component{
     else if(isPlayed){
       isPlayed=false;
       songDisplay=true;
+      $(document).ready(function() {
+        let actElt=$('.active');
+        actElt.removeClass('active');
+        let elt=document.getElementById(""+songId);
+        $(elt).addClass('active');
+        $(elt)[0].scrollIntoView();
+     });
     }
     else if(isMusicClicked && songDisplay) songDisplay=false;
     else if(isMusicClicked){
@@ -233,7 +258,7 @@ class App extends React.Component{
     }
 
     // When clicked on back pause the audio Element
-    if(typeof(audioElement)==='object'){
+    if(audioElement!==null){
       audioElement.pause();
     }
 
@@ -304,12 +329,14 @@ class App extends React.Component{
     audioElement = document.createElement('audio');
     audioElement.setAttribute('src', songs[index].src);
     audioElement.addEventListener("canplay",function(){
+      audioElement=self.state.audioElement;
       let duration=audioElement.duration;
       let minutes=parseInt(duration/60);
       let seconds=parseInt(duration%60);
       let time=(minutes<10?"0"+minutes:minutes)+":"+(seconds<10?"0"+seconds:seconds)
       $('.end-time').text(time);
       audioElement.play();
+      self.setState({isPaused:false});
     });
 
     audioElement.addEventListener("timeupdate",function(){
@@ -337,7 +364,10 @@ class App extends React.Component{
       $('.start-time').text(time);
 
 
-      if(currentTime===duration) self.pauseButtonHandler();
+      if(currentTime===duration){
+        self.pauseButtonHandler();
+        self.nextItem();
+      }
       });
 
     return audioElement;
@@ -364,8 +394,44 @@ class App extends React.Component{
     });
   }
 
+  // Password handler
+  handleKeypress= (event)=> {
+    let thisObj=this;
+    let self=event.target;
+    event.persist();
+    if((event.keyCode>=48 && event.keyCode<=57) || event.keyCode===8 || event.keyCode===32){
+      $(document).ready(function(){
+        if(event.keyCode!==8) $(self).next().focus();
+        else $(self).prev().focus();
+      });
+    }
+    else if(event.keyCode===13){
+      $(document).ready(function(){
+        let inputs=$('input');
+        let flag=false;
+        for(let i=0;i<inputs.length;i++){
+          if(inputs[i].value!=='1') flag=true;
+        }
+        if(!flag){
+          $('.password-field').css('display','none');
+          $('.password-label').text('Welcome Mohit');
+          thisObj.setState({isUnlocked:true});
+        }else{
+          $('.password-field').css('display','none');
+          $('.password-label').css('color','red').text('Wrong Password!!!');
+          setTimeout(()=>{
+            $('.password-field').css('display','flex');
+            $('.password-label').text('Enter your password').css('color','white');
+          },800);
+        }
+        $(inputs).val("");
+      });
+    }
+    else event.preventDefault();
+  }
+
   render() {
-    const {isMenuClicked,isGameClicked,isMusicClicked,isSettingsClicked,songDisplay,isPlayed,songId,isPaused,date}=this.state;
+    const {isMenuClicked,isGameClicked,isMusicClicked,isSettingsClicked,songDisplay,isPlayed,songId,isPaused,isUnlocked,date}=this.state;
     return (
       <div className="App">
         <h1 style={{marginBottom:'20px'}}><FontAwesomeIcon icon={faAppleAlt} /> My IPod</h1>
@@ -376,17 +442,24 @@ class App extends React.Component{
           </div>
 
           <div className="list">
-            {!isMenuClicked && !isMusicClicked && !isGameClicked && !isSettingsClicked &&
-              <div style={{display:'flex',flexDirection:'column-reverse',alignItems:'center',height:'250px',justifyContent:'space-between'}}>
-               <h1 style={{margin:'20px',color:'#ffffff'}}><FontAwesomeIcon icon={faFingerprint} /></h1>
-               <h3 style={{color:'#ffffff'}}>_&ensp;_&ensp;_&ensp;_</h3>
-               <h3 style={{color:'#ffffff',fontFamily:'cursive'}}>Enter your password</h3>
-               <h2 style={{margin:'20px',color:'#ffffff',fontFamily:'monospace',fontSize:'30px'}}>
+            {((!isMenuClicked && !isMusicClicked && !isGameClicked && !isSettingsClicked) || !isUnlocked) &&
+              <div style={{display:'flex',flexDirection:'column-reverse',alignItems:'center',height:'250px',justifyContent:'space-evenly'}}>
+               <h1 style={{margin:'20px',color:'#ffffff'}}><FontAwesomeIcon icon={isUnlocked?faLockOpen:faLock} /></h1>
+               {!isUnlocked &&
+               <h3 style={{color:'#ffffff'}} className="password-field">
+                 <input type="text" id="digit1" onKeyDown={this.handleKeypress} min="0" max="9" maxLength="1"/>
+                 <input type="text" id="digit2" onKeyDown={this.handleKeypress} min="0" max="9" maxLength="1"/>
+                 <input type="text" id="digit3" onKeyDown={this.handleKeypress} min="0" max="9" maxLength="1"/>
+                 <input type="text" id="digit4" onKeyDown={this.handleKeypress} maxLength="1"/>
+              </h3>}
+               <h4 style={{color:'#ffffff',fontFamily:'cursive'}} className="password-label">{!isUnlocked?"Enter your password":"Welcome Mohit"}</h4>
+               {isUnlocked && <h5 style={{color:'#ffffff',fontFamily:'monospace',fontSize:'30px'}}>{date.toDateString()}</h5>}
+               <h3 style={{marginTop:'20px',color:'#ffffff',fontFamily:'monospace',fontSize:'30px'}}>
                  {date.toLocaleTimeString('en-US', {hour: '2-digit',hour12: 'true',minute:'2-digit'})}
-               </h2>
+               </h3>
               </div>}
             
-            {isMenuClicked && 
+            {isMenuClicked && isUnlocked &&
             <div className="row">
               <div className="col-7">
                 <div className="list-group" id="list-tab" role="tablist">
@@ -400,19 +473,19 @@ class App extends React.Component{
               </div>
             </div>}
 
-            {isGameClicked && 
+            {isGameClicked && isUnlocked &&
             <div className="games">
               <img src="https://www.collinsdictionary.com/images/full/dice_393025615_1000.jpg" alt="games"></img>
               <h3>Games</h3>
             </div>}
 
-            {isMusicClicked && 
+            {isMusicClicked && isUnlocked &&
             <div className="music">
               <Music songDisplay={songDisplay} songs={this.state.songs} isPlayed={isPlayed} index={songId} playClick={this.playClick}
                       pauseButtonHandler={this.pauseButtonHandler} isPaused={isPaused} prevHandler={this.prevItem} nextHandler={this.nextItem}/>
             </div>}
 
-            {isSettingsClicked && 
+            {isSettingsClicked && isUnlocked &&
             <div className="settings">
               <img src="https://icons.iconarchive.com/icons/icons8/ios7/512/Very-Basic-Settings-icon.png" alt="settings"></img>
               <h3>Settings</h3>
@@ -424,7 +497,9 @@ class App extends React.Component{
               <h3 className="item1" onClick={() => this.menuDisplay()}>Menu</h3>
               <h3 className="item2" onClick={() =>this.nextItem()}><FontAwesomeIcon icon={faFastForward} /></h3>
               <h3 className="item3" onClick={() => this.prevItem()}><FontAwesomeIcon icon={faFastBackward} /></h3>
-              <h3 className="item4" onClick={() => this.backClick()}><FontAwesomeIcon icon={faChevronLeft} /> Back</h3>
+              <h3 className="item4" onClick={() => this.backClick()}><FontAwesomeIcon icon={isUnlocked && !isMenuClicked && !isGameClicked && !isMusicClicked?faLock:faChevronLeft} /> 
+                {isUnlocked && !isMenuClicked && !isGameClicked && !isMusicClicked?"Lock":"Back"}
+              </h3>
               <button className="okbutton" onClick={()=>{this.okClick()}}><b>OK</b></button>
             </div>
           </div>
@@ -433,5 +508,6 @@ class App extends React.Component{
     );
   }
 }
+
 
 export default App;
